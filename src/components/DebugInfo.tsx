@@ -9,13 +9,13 @@ export function DebugInfo() {
   const host = import.meta.env.VITE_POSTHOG_HOST;
 
   return (
-    <div className="fixed bottom-20 right-4 bg-black text-white p-4 rounded-lg text-xs max-w-xs z-50">
-      <h3 className="font-bold mb-2">PostHog Debug</h3>
-      <div className="space-y-1">
-        <p>Configured: {configured ? '✅' : '❌'}</p>
-        <p>Enabled: {enabled ? '✅' : '❌'}</p>
-        <p>API Key: {apiKey ? `${apiKey.substring(0, 10)}...` : '❌ Not set'}</p>
-        <p>Host: {host || '❌ Not set'}</p>
+    <div className="bg-yellow-100 dark:bg-yellow-900 border-2 border-yellow-500 p-4 rounded-lg mb-6">
+      <h3 className="font-bold mb-2 text-gray-900 dark:text-gray-100">🐛 PostHog Debug Info</h3>
+      <div className="space-y-1 text-sm text-gray-900 dark:text-gray-100">
+        <p><strong>Configured:</strong> {configured ? '✅ Yes' : '❌ No'}</p>
+        <p><strong>Enabled:</strong> {enabled ? '✅ Yes' : '❌ No'}</p>
+        <p><strong>API Key:</strong> {apiKey ? `${apiKey.substring(0, 10)}...` : '❌ Not set'}</p>
+        <p><strong>Host:</strong> {host || '❌ Not set'}</p>
       </div>
     </div>
   );
