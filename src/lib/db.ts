@@ -34,7 +34,7 @@ export async function initializeSettings(): Promise<UserSettings> {
     theme: 'system',
     questions: [],
     graphEdgeThreshold: 0.3,
-    analyticsEnabled: false,
+    analyticsEnabled: true, // Enabled by default, users can opt out in Settings
   };
 
   await db.userSettings.put({ id: 1, ...defaultSettings });
