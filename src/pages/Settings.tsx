@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCueGraph } from '../lib/store';
 import { setAnalyticsEnabled, isPostHogConfigured } from '../lib/telemetry';
 import { Modal } from '../components/Modal';
+import { DebugInfo } from '../components/DebugInfo';
 import type { UserSettings } from '../lib/types';
 
 export function Settings() {
@@ -273,6 +274,9 @@ export function Settings() {
           </button>
         </div>
       </Modal>
+
+      {/* Debug info - remove after troubleshooting */}
+      <DebugInfo />
     </div>
   );
 }
