@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { CueGraphProvider, useCueGraph } from './lib/store';
 import { ToastProvider } from './lib/useToasts';
 import { ToastContainer } from './components/Toast';
+import { ConsentBanner } from './components/ConsentBanner';
 import { NavBar } from './components/NavBar';
 import { Onboarding } from './pages/Onboarding';
 import { Log } from './pages/Log';
@@ -61,10 +62,13 @@ function AppRoutes() {
   // If onboarding not completed, redirect to onboarding
   if (!settings.onboardingCompleted) {
     return (
-      <Routes>
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="*" element={<Navigate to="/onboarding" replace />} />
-      </Routes>
+      <>
+        <Routes>
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="*" element={<Navigate to="/onboarding" replace />} />
+        </Routes>
+        <ConsentBanner />
+      </>
     );
   }
 
@@ -81,6 +85,7 @@ function AppRoutes() {
       </Routes>
       <NavBar />
       <ToastContainer />
+      <ConsentBanner />
     </div>
   );
 }

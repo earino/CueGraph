@@ -61,6 +61,7 @@ export function CueGraphProvider({ children }: { children: React.ReactNode }) {
         questions: settingsRow.questions,
         graphEdgeThreshold: settingsRow.graphEdgeThreshold,
         analyticsEnabled: settingsRow.analyticsEnabled,
+        consentGiven: settingsRow.consentGiven,
       }
     : null;
 
@@ -78,15 +79,16 @@ export function CueGraphProvider({ children }: { children: React.ReactNode }) {
     init();
   }, []);
 
-  // Initialize telemetry when settings are available
+  // Initialize telemetry when settings are available and consent is given
   useEffect(() => {
     if (settings) {
-      initTelemetry(settings);
-      if (settings.analyticsEnabled) {
+      // Only initialize if consent has been explicitly given
+      if (settings.consentGiven === true && settings.analyticsEnabled) {
+        initTelemetry(settings);
         trackEvent('app_opened');
       }
     }
-  }, [settings?.analyticsEnabled]);
+  }, [settings?.analyticsEnabled, settings?.consentGiven]);
 
   // Recompute edges when data changes
   const refreshEdges = useCallback(() => {

@@ -43,6 +43,8 @@ export function initTelemetry(settings: UserSettings): void {
       // Disable persistence of user properties
       disable_persistence: false, // We need some persistence for distinct_id
       persistence: 'localStorage',
+      // Create person profiles for better analytics
+      person_profiles: 'always',
     });
 
     isInitialized = true;

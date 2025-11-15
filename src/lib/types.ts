@@ -64,4 +64,5 @@ export interface UserSettings {
   questions: string[];             // free-text "what am I curious about?" from onboarding
   graphEdgeThreshold: number;      // default min inferredStrength to show edges (0–1)
   analyticsEnabled: boolean;       // whether anonymous usage analytics is on
+  consentGiven?: boolean;          // undefined = not asked yet, true = accepted, false = declined
 }
