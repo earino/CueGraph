@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 99 102 241;
+    --color-background: 255 255 255;
+    --color-text: 17 24 39;
+    --color-border: 229 231 235;
+  }
+
+  .dark {
+    --color-primary: 129 140 248;
+    --color-background: 17 24 39;
+    --color-text: 243 244 246;
+    --color-border: 55 65 81;
+  }
+
+  body {
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}

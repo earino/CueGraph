@@ -1,0 +1,154 @@
+[
+  {
+    "id": "eat-spicy-food",
+    "label": "Eat spicy food",
+    "emoji": "🌶",
+    "category": "action",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "felt-spicy-food",
+    "label": "Felt spicy food (bathroom)",
+    "emoji": "🚽",
+    "category": "symptom",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "skin-flush",
+    "label": "Skin flush",
+    "emoji": "😳",
+    "category": "symptom",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "dandruff-flare",
+    "label": "Dandruff flare",
+    "emoji": "❄️",
+    "category": "symptom",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "got-drunk",
+    "label": "Got drunk",
+    "emoji": "🍻",
+    "category": "action",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "late-to-work",
+    "label": "Late to work",
+    "emoji": "⏰",
+    "category": "situation",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "felt-like-shit",
+    "label": "Felt like shit in the morning",
+    "emoji": "🤢",
+    "category": "symptom",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "sunday-snuck-away",
+    "label": "Felt like Sunday snuck away",
+    "emoji": "😔",
+    "category": "mood",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "caffeine-late",
+    "label": "Caffeine late",
+    "emoji": "☕",
+    "category": "action",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "poor-sleep",
+    "label": "Poor sleep",
+    "emoji": "😴",
+    "category": "symptom",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "hard-workout",
+    "label": "Hard workout",
+    "emoji": "🏋️",
+    "category": "action",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "muscle-soreness",
+    "label": "Muscle soreness",
+    "emoji": "💢",
+    "category": "symptom",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "high-sugar",
+    "label": "High sugar / dessert",
+    "emoji": "🍰",
+    "category": "action",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "mood-dip",
+    "label": "Mood dip / brain fog",
+    "emoji": "🌫️",
+    "category": "mood",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "high-stress-day",
+    "label": "High stress day",
+    "emoji": "😬",
+    "category": "situation",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "new-shampoo",
+    "label": "New shampoo / product",
+    "emoji": "🧴",
+    "category": "action",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "itchy-scalp",
+    "label": "Itchy scalp",
+    "emoji": "🪳",
+    "category": "symptom",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "skin-breakout",
+    "label": "Skin breakout",
+    "emoji": "⚡",
+    "category": "symptom",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  },
+  {
+    "id": "headache",
+    "label": "Headache",
+    "emoji": "🤯",
+    "category": "symptom",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "isBuiltIn": true
+  }
+]
