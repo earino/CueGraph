@@ -38,8 +38,8 @@ export function initTelemetry(settings: UserSettings): void {
       capture_pageview: false, // We'll manually track screens
       capture_pageleave: false,
       ip: false, // Don't capture IP
-      // Respect Do Not Track
-      respect_dnt: true,
+      // Don't respect DNT since we have explicit consent via banner
+      respect_dnt: false,
       // Disable persistence of user properties
       disable_persistence: false, // We need some persistence for distinct_id
       persistence: 'localStorage',
