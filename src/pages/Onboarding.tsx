@@ -1,275 +1,378 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Zap, TrendingUp } from 'lucide-react';
 import { useCueGraph } from '../lib/store';
-import { Chip } from '../components/Chip';
-import { EventButton } from '../components/EventButton';
 import { trackEvent } from '../lib/telemetry';
 
-const questionChips = [
-  {
-    id: 'spicy_bathroom',
-    label: 'Spicy food & bathroom',
-    question: 'Does spicy food mess up my stomach or skin?',
-    eventTypeIds: ['eat-spicy-food', 'felt-spicy-food', 'skin-flush']
-  },
-  {
-    id: 'spicy_skin',
-    label: 'Spicy food & skin',
-    question: 'Does spicy food trigger skin issues?',
-    eventTypeIds: ['eat-spicy-food', 'skin-flush', 'dandruff-flare']
-  },
-  {
-    id: 'drinking_mornings',
-    label: 'Drinking & mornings',
-    question: 'Does drinking on weeknights ruin my mornings?',
-    eventTypeIds: ['got-drunk', 'felt-like-shit', 'late-to-work']
-  },
-  {
-    id: 'sleep_mood',
-    label: 'Sleep & mood',
-    question: 'Does poor sleep make me extra snappy?',
-    eventTypeIds: ['poor-sleep', 'mood-dip', 'high-stress-day']
-  },
-  {
-    id: 'sugar_crashes',
-    label: 'Sugar & crashes',
-    question: 'Do sugar crashes affect my energy?',
-    eventTypeIds: ['high-sugar', 'mood-dip']
-  },
+// Popular starter events for quick onboarding
+const STARTER_EVENTS = [
+  { label: 'Ate spicy food', emoji: '🌶️', category: 'action' as const, id: 'eat-spicy-food' },
+  { label: 'Had coffee', emoji: '☕', category: 'action' as const, id: 'caffeine-late' },
+  { label: 'Felt great', emoji: '😊', category: 'mood' as const, id: 'mood-up' },
+  { label: 'Had a headache', emoji: '🤕', category: 'symptom' as const, id: 'headache' },
+  { label: 'Worked out', emoji: '💪', category: 'action' as const, id: 'hard-workout' },
+  { label: 'Felt stressed', emoji: '😰', category: 'mood' as const, id: 'high-stress-day' },
+  { label: 'Slept poorly', emoji: '😴', category: 'symptom' as const, id: 'poor-sleep' },
+  { label: 'Had a drink', emoji: '🍺', category: 'action' as const, id: 'got-drunk' },
 ];
 
 export function Onboarding() {
-  const { eventTypes, updateUserSettings } = useCueGraph();
+  const { eventTypes, updateUserSettings, logEvent, createEventType } = useCueGraph();
   const [step, setStep] = useState(1);
-  const [analyticsEnabled] = useState(true); // Analytics enabled by default, users can opt out in Settings
-  const [questions, setQuestions] = useState<string[]>(['', '', '', '']);
-  const [selectedChipEventTypes, setSelectedChipEventTypes] = useState<string[]>([]);
-  const [pinnedEventTypeIds, setPinnedEventTypeIds] = useState<string[]>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const handleNext = () => setStep(step + 1);
-  const handleBack = () => setStep(step - 1);
 
-  const handleChipClick = (chip: typeof questionChips[0]) => {
-    // Find first empty question slot and fill it
-    const emptyIndex = questions.findIndex(q => !q);
-    if (emptyIndex !== -1) {
-      const newQuestions = [...questions];
-      newQuestions[emptyIndex] = chip.question;
-      setQuestions(newQuestions);
+  const handleEventSelect = async (event: typeof STARTER_EVENTS[0]) => {
+    setShowConfetti(true);
+
+    // Find or create the event type
+    let eventType = eventTypes.find(t => t.id === event.id);
+    if (!eventType) {
+      eventType = await createEventType({
+        label: event.label,
+        emoji: event.emoji,
+        category: event.category,
+      });
     }
 
-    // Add related event types to highlight list
-    setSelectedChipEventTypes(prev =>
-      Array.from(new Set([...prev, ...chip.eventTypeIds]))
-    );
+    // Log the event
+    await logEvent(eventType.id);
 
-    trackEvent('onboarding_question_chip_selected', { chip: chip.id });
-  };
+    // Wait a moment for the celebration, then move to next step
+    setTimeout(() => {
+      handleNext();
+      setShowConfetti(false);
+    }, 1500);
 
-  const handleQuestionChange = (index: number, value: string) => {
-    const newQuestions = [...questions];
-    newQuestions[index] = value;
-    setQuestions(newQuestions);
-  };
-
-  const handleEventTypeToggle = (eventTypeId: string) => {
-    setPinnedEventTypeIds(prev =>
-      prev.includes(eventTypeId)
-        ? prev.filter(id => id !== eventTypeId)
-        : [...prev, eventTypeId]
-    );
+    trackEvent('onboarding_first_event_logged', { event_id: event.id });
   };
 
   const handleComplete = async () => {
-    const filteredQuestions = questions.filter(q => q.trim());
-
     await updateUserSettings({
       onboardingCompleted: true,
-      analyticsEnabled,
-      questions: filteredQuestions,
-      pinnedEventTypeIds,
+      pinnedEventTypeIds: [], // We'll let them customize this later in the app
     });
 
     trackEvent('onboarding_completed', {
-      question_count: filteredQuestions.length,
-      pinned_count: pinnedEventTypeIds.length,
+      question_count: 0,
+      pinned_count: 0,
     });
   };
 
-  // Screen 1: Intro
+  // Screen 1: Hero/Welcome
   if (step === 1) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-gray-900 dark:to-gray-800 p-6 flex flex-col">
-        <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Welcome to CueGraph
-          </h1>
-
-          <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
-            Map how your life's events seem to trigger each other.
-          </p>
-
-          <div className="space-y-3 mb-8">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">📝</span>
-              <p className="text-gray-700 dark:text-gray-300">
-                <strong>Log life events</strong> like meals, activities, symptoms, and moods
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">🔗</span>
-              <p className="text-gray-700 dark:text-gray-300">
-                <strong>Connect the dots</strong> by marking what you think caused what
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">🕸️</span>
-              <p className="text-gray-700 dark:text-gray-300">
-                <strong>Discover patterns</strong> in how events relate over time
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-8">
-            <p className="text-sm text-blue-900 dark:text-blue-200">
-              <strong>Privacy first:</strong> All your event data stays on your device. No accounts, no servers, no sharing.
-            </p>
-          </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="min-h-screen bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 p-6 flex flex-col relative overflow-hidden"
+      >
+        {/* Animated background blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className="absolute -top-20 -right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1.2, 1, 1.2],
+              rotate: [0, -90, 0],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className="absolute -bottom-20 -left-20 w-96 h-96 bg-white/10 rounded-full blur-3xl"
+          />
         </div>
 
-        <button
+        <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full relative z-10">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
+              <Sparkles className="w-4 h-4 text-white" />
+              <span className="text-sm font-medium text-white">Your personal pattern finder</span>
+            </div>
+
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+              Discover what triggers what in your life
+            </h1>
+
+            <p className="text-xl text-white/90 mb-8 leading-relaxed">
+              Track events. Connect causes. See patterns emerge.
+            </p>
+
+            <div className="space-y-4 mb-12">
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4"
+              >
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">Log life events in seconds</p>
+                  <p className="text-sm text-white/80">Meals, symptoms, moods, activities</p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4"
+              >
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">Discover surprising patterns</p>
+                  <p className="text-sm text-white/80">See what causes what over time</p>
+                </div>
+              </motion.div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 mb-8">
+              <p className="text-sm text-white/90">
+                🔒 <strong>Privacy first:</strong> All your data stays on your device. No accounts, no servers.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+
+        <motion.button
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleNext}
-          className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
+          className="w-full py-5 bg-white text-purple-600 font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl transition-all"
         >
-          Get Started
-        </button>
-      </div>
+          Get started
+        </motion.button>
+      </motion.div>
     );
   }
 
-  // Screen 2: Questions
+  // Screen 2: Log First Event
   if (step === 2) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 p-6 flex flex-col">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-6 flex flex-col"
+      >
         <div className="flex-1 max-w-2xl mx-auto w-full">
-          <button
-            onClick={handleBack}
-            className="text-primary-600 dark:text-primary-400 mb-6"
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
           >
-            ← Back
-          </button>
+            <div className="text-center mb-8">
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                Let's log your first event
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                What happened recently? Pick one:
+              </p>
+            </div>
 
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            What are you curious about?
-          </h2>
-
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            What 1-4 questions would you like to explore? (Optional)
-          </p>
-
-          <div className="space-y-4 mb-6">
-            {questions.map((question, index) => (
-              <div key={index}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Question {index + 1} {index === 0 ? '(optional)' : ''}
-                </label>
-                <input
-                  type="text"
-                  value={question}
-                  onChange={(e) => handleQuestionChange(index, e.target.value)}
-                  placeholder="e.g., Does spicy food mess up my stomach?"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="mb-8">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              Quick suggestions:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {questionChips.map(chip => (
-                <Chip
-                  key={chip.id}
-                  label={chip.label}
-                  onClick={() => handleChipClick(chip)}
-                />
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {STARTER_EVENTS.map((event, index) => (
+                <motion.button
+                  key={event.id}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.1 + index * 0.05 }}
+                  whileHover={{ scale: 1.05, y: -4 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleEventSelect(event)}
+                  className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all border-2 border-gray-100 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600"
+                >
+                  <div className="text-4xl mb-3">{event.emoji}</div>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                    {event.label}
+                  </p>
+                </motion.button>
               ))}
             </div>
-          </div>
+
+            <motion.button
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              whileHover={{ scale: 1.02 }}
+              onClick={() => {
+                // For now, just move to next step
+                // In a real implementation, this would open a create event modal
+                handleNext();
+              }}
+              className="w-full py-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl text-gray-600 dark:text-gray-400 hover:border-purple-400 dark:hover:border-purple-500 hover:text-purple-600 dark:hover:text-purple-400 transition-all font-medium"
+            >
+              ✨ Or create your own
+            </motion.button>
+          </motion.div>
         </div>
 
-        <button
-          onClick={handleNext}
-          className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
-        >
-          Continue
-        </button>
-      </div>
+        {/* Confetti effect */}
+        <AnimatePresence>
+          {showConfetti && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 pointer-events-none flex items-center justify-center z-50"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1.5 }}
+                exit={{ scale: 0 }}
+                className="text-8xl"
+              >
+                🎉
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     );
   }
 
-  // Screen 3: Choose starter events
+  // Screen 3: Show the Magic
   if (step === 3) {
-    const builtInTypes = eventTypes.filter(t => t.isBuiltIn);
-
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 p-6 flex flex-col">
-        <div className="flex-1 max-w-2xl mx-auto w-full">
-          <button
-            onClick={handleBack}
-            className="text-primary-600 dark:text-primary-400 mb-6"
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 flex flex-col"
+      >
+        <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
           >
-            ← Back
-          </button>
+            <div className="text-center mb-12">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+                className="inline-block text-6xl mb-6"
+              >
+                🎯
+              </motion.div>
 
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Choose events to track
-          </h2>
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                Great! Here's how it works
+              </h2>
 
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Select 3-8 events you want quick access to on your home screen.
-          </p>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                The more you log, the more patterns you'll discover
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-            {builtInTypes.map(eventType => {
-              const isSelected = pinnedEventTypeIds.includes(eventType.id);
-              const isHighlighted = selectedChipEventTypes.includes(eventType.id);
-
-              return (
-                <div key={eventType.id} className={isHighlighted ? 'ring-2 ring-primary-400 rounded-xl' : ''}>
-                  <EventButton
-                    eventType={eventType}
-                    onClick={() => handleEventTypeToggle(eventType.id)}
-                    selected={isSelected}
-                  />
+            {/* The Loop */}
+            <div className="space-y-6 mb-12">
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="flex items-start gap-4 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg"
+              >
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">
+                  1️⃣
                 </div>
-              );
-            })}
-          </div>
+                <div>
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 mb-1">
+                    Log events as they happen
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Quick-tap events throughout your day. Takes just seconds.
+                  </p>
+                </div>
+              </motion.div>
 
-          <div className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
-            {pinnedEventTypeIds.length} selected
-          </div>
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="flex items-start gap-4 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg"
+              >
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">
+                  2️⃣
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 mb-1">
+                    Connect the dots
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    When something happens, we'll ask "What caused this?" Tap to connect.
+                  </p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="flex items-start gap-4 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg"
+              >
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl">
+                  3️⃣
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 mb-1">
+                    Discover surprising patterns
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    See correlations emerge. Find out what really triggers what.
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-2xl p-4 text-center"
+            >
+              <p className="text-purple-900 dark:text-purple-200">
+                <strong>Pro tip:</strong> The more events you log, the better patterns you'll discover!
+              </p>
+            </motion.div>
+          </motion.div>
         </div>
 
-        <button
+        <motion.button
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleComplete}
-          disabled={pinnedEventTypeIds.length < 3}
-          className={`
-            w-full py-4 font-semibold rounded-xl transition-colors
-            ${pinnedEventTypeIds.length >= 3
-              ? 'bg-primary-600 hover:bg-primary-700 text-white'
-              : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-            }
-          `}
+          className="w-full py-5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl transition-all"
         >
-          {pinnedEventTypeIds.length < 3
-            ? `Select at least ${3 - pinnedEventTypeIds.length} more`
-            : 'Start Using CueGraph'
-          }
-        </button>
-      </div>
+          Start tracking
+        </motion.button>
+      </motion.div>
     );
   }
 

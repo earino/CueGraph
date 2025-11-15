@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Sparkles } from 'lucide-react';
 import { useCueGraph } from '../lib/store';
 import { useToasts } from '../lib/useToasts';
-import { EventButton } from '../components/EventButton';
 import { Modal } from '../components/Modal';
 import { BottomSheet } from '../components/BottomSheet';
 import { Chip } from '../components/Chip';
@@ -14,6 +15,7 @@ export function Log() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCauseSheet, setShowCauseSheet] = useState(false);
   const [justLoggedEvent, setJustLoggedEvent] = useState<EventInstance | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // New event type form
   const [newEventName, setNewEventName] = useState('');
@@ -28,6 +30,11 @@ export function Log() {
   const handleQuickLog = async (eventType: EventType) => {
     const event = await logEvent(eventType.id);
     setJustLoggedEvent(event);
+
+    // Show celebration
+    setShowCelebration(true);
+    setTimeout(() => setShowCelebration(false), 1000);
+
     addToast(`Logged: ${eventType.label} ${eventType.emoji || ''}`, 'success');
 
     // Show "what caused this?" sheet
@@ -96,47 +103,100 @@ export function Log() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 pb-24">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          Log Event
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-8">
-          Quick log an event that just happened
-        </p>
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="mb-8"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              Log Event
+            </h1>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">
+            What just happened?
+          </p>
+        </motion.div>
 
         {/* Pinned event types */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {pinnedTypes.map(eventType => (
-            <EventButton
-              key={eventType.id}
-              eventType={eventType}
-              onClick={() => handleQuickLog(eventType)}
-              variant="large"
-            />
-          ))}
-        </div>
+        {pinnedTypes.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-2 gap-3 mb-6"
+          >
+            {pinnedTypes.map((eventType, index) => (
+              <motion.div
+                key={eventType.id}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1 + index * 0.05 }}
+                whileHover={{ scale: 1.05, y: -4 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <button
+                  onClick={() => handleQuickLog(eventType)}
+                  className="w-full bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all border-2 border-gray-100 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600"
+                >
+                  <div className="text-4xl mb-2">{eventType.emoji}</div>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                    {eventType.label}
+                  </p>
+                </button>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-2xl p-6 mb-6 text-center"
+          >
+            <div className="text-4xl mb-3">👋</div>
+            <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              No events pinned yet
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Create your first event below to start tracking!
+            </p>
+          </motion.div>
+        )}
 
         {/* Create new event button */}
-        <button
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setShowCreateModal(true)}
-          className="w-full py-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-gray-600 dark:text-gray-400 hover:border-primary-400 dark:hover:border-primary-600 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium"
+          className="w-full py-5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
         >
-          + Add New Event Type
-        </button>
+          <Plus className="w-5 h-5" />
+          Add New Event
+        </motion.button>
 
         {/* Recent activity */}
         {eventInstances.length > 0 && (
-          <div className="mt-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-8"
+          >
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               Recent Activity
             </h2>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {eventInstances
                 .slice()
                 .sort((a, b) => new Date(b.timestampUTC).getTime() - new Date(a.timestampUTC).getTime())
                 .slice(0, 5)
-                .map(instance => {
+                .map((instance, index) => {
                   const eventType = eventTypes.find(t => t.id === instance.eventTypeId);
                   if (!eventType) return null;
 
@@ -149,24 +209,27 @@ export function Log() {
                     : `${Math.floor(timeAgo / 1440)}d ago`;
 
                   return (
-                    <div
+                    <motion.div
                       key={instance.id}
-                      className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg"
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-gray-700"
                     >
-                      <span className="text-2xl">{eventType.emoji}</span>
+                      <div className="text-3xl">{eventType.emoji}</div>
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900 dark:text-gray-100">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">
                           {eventType.label}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           {timeAgoStr}
                         </p>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
 
@@ -186,7 +249,7 @@ export function Log() {
               value={newEventName}
               onChange={(e) => setNewEventName(e.target.value)}
               placeholder="e.g., Morning coffee"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-purple-500 dark:focus:border-purple-400 focus:outline-none transition-colors"
             />
           </div>
 
@@ -200,7 +263,7 @@ export function Log() {
               onChange={(e) => setNewEventEmoji(e.target.value)}
               placeholder="☕"
               maxLength={2}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-purple-500 dark:focus:border-purple-400 focus:outline-none transition-colors text-2xl"
             />
           </div>
 
@@ -211,7 +274,7 @@ export function Log() {
             <select
               value={newEventCategory}
               onChange={(e) => setNewEventCategory(e.target.value as EventType['category'])}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-purple-500 dark:focus:border-purple-400 focus:outline-none transition-colors"
             >
               <option value="action">Action</option>
               <option value="symptom">Symptom</option>
@@ -221,25 +284,27 @@ export function Log() {
             </select>
           </div>
 
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={pinNewEvent}
               onChange={(e) => setPinNewEvent(e.target.checked)}
-              className="w-5 h-5 text-primary-600 rounded"
+              className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500"
             />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              Pin to home screen
+            <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+              Pin to home screen for quick access
             </span>
           </label>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleCreateEventType}
             disabled={!newEventName.trim()}
-            className="w-full py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
+            className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-300 disabled:to-gray-300 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white font-semibold rounded-xl transition-all shadow-lg"
           >
-            Create & Log
-          </button>
+            Create & Log Event
+          </motion.button>
         </div>
       </Modal>
 
@@ -278,18 +343,46 @@ export function Log() {
             </div>
           </>
         ) : (
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            No recent events found in the past 72 hours. Start logging more events to build connections!
-          </p>
+          <div className="text-center py-8">
+            <div className="text-5xl mb-4">🤔</div>
+            <p className="text-gray-600 dark:text-gray-400">
+              No recent events found in the past 72 hours.
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+              Start logging more events to build connections!
+            </p>
+          </div>
         )}
 
         <button
           onClick={() => setShowCauseSheet(false)}
-          className="w-full mt-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold rounded-lg"
+          className="w-full mt-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
         >
           Skip for now
         </button>
       </BottomSheet>
+
+      {/* Celebration overlay */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 pointer-events-none flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: 0 }}
+              animate={{ scale: 1.5, rotate: 360 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-8xl"
+            >
+              ✨
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
