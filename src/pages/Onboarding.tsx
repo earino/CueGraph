@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useCueGraph } from '../lib/store';
 import { Chip } from '../components/Chip';
 import { EventButton } from '../components/EventButton';
-import { trackEvent, isPostHogConfigured } from '../lib/telemetry';
+import { trackEvent } from '../lib/telemetry';
 
 const questionChips = [
   {
@@ -40,7 +40,7 @@ const questionChips = [
 export function Onboarding() {
   const { eventTypes, updateUserSettings } = useCueGraph();
   const [step, setStep] = useState(1);
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
+  const [analyticsEnabled] = useState(true); // Analytics enabled by default, users can opt out in Settings
   const [questions, setQuestions] = useState<string[]>(['', '', '', '']);
   const [selectedChipEventTypes, setSelectedChipEventTypes] = useState<string[]>([]);
   const [pinnedEventTypeIds, setPinnedEventTypeIds] = useState<string[]>([]);
@@ -130,23 +130,9 @@ export function Onboarding() {
           </div>
 
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-8">
-            <p className="text-sm text-blue-900 dark:text-blue-200 mb-3">
+            <p className="text-sm text-blue-900 dark:text-blue-200">
               <strong>Privacy first:</strong> All your event data stays on your device. No accounts, no servers, no sharing.
             </p>
-
-            {isPostHogConfigured() && (
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={analyticsEnabled}
-                  onChange={(e) => setAnalyticsEnabled(e.target.checked)}
-                  className="mt-1 w-5 h-5 text-primary-600 rounded"
-                />
-                <span className="text-sm text-blue-900 dark:text-blue-200">
-                  Share anonymous usage statistics (like which screens you visit) to help improve CueGraph. We never send the contents of your events or notes.
-                </span>
-              </label>
-            )}
           </div>
         </div>
 
