@@ -10,12 +10,14 @@
     "test": "vitest"
   },
   "dependencies": {
+    "dexie": "^4.0.8",
+    "dexie-react-hooks": "^1.1.7",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.553.0",
+    "posthog-js": "^1.165.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1",
-    "dexie": "^4.0.8",
-    "dexie-react-hooks": "^1.1.7",
-    "posthog-js": "^1.165.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
@@ -23,12 +25,12 @@
     "@types/react-dom": "^18.3.0",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.45",
+    "tailwindcss": "^3.4.10",
     "typescript": "^5.5.3",
     "vite": "^5.4.3",
-    "vitest": "^2.0.5",
-    "tailwindcss": "^3.4.10",
-    "postcss": "^8.4.45",
-    "autoprefixer": "^10.4.20",
-    "vite-plugin-pwa": "^0.20.5"
+    "vite-plugin-pwa": "^0.20.5",
+    "vitest": "^2.0.5"
   }
 }
