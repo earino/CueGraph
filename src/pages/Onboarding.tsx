@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Zap, TrendingUp } from 'lucide-react';
 import { useCueGraph } from '../lib/store';
@@ -21,6 +21,11 @@ export function Onboarding() {
   const { eventTypes, updateUserSettings, logEvent, createEventType } = useCueGraph();
   const [step, setStep] = useState(1);
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [step]);
 
   const handleNext = () => setStep(step + 1);
 

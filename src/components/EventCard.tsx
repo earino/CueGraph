@@ -1,16 +1,23 @@
+import { Trash2 } from 'lucide-react';
 import type { EventInstance, EventType } from '../lib/types';
 
 interface EventCardProps {
   event: EventInstance;
   eventType: EventType;
   onClick?: () => void;
+  onDelete?: () => void;
 }
 
-export function EventCard({ event, eventType, onClick }: EventCardProps) {
+export function EventCard({ event, eventType, onClick, onDelete }: EventCardProps) {
   // Convert UTC to local time
   const date = new Date(event.timestampUTC);
   const localTime = new Date(date.getTime() - event.localOffsetMinutes * 60 * 1000);
   const timeString = localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.();
+  };
 
   return (
     <button
@@ -27,9 +34,20 @@ export function EventCard({ event, eventType, onClick }: EventCardProps) {
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
               {eventType.label}
             </h3>
-            <span className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">
-              {timeString}
-            </span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {timeString}
+              </span>
+              {onDelete && (
+                <button
+                  onClick={handleDelete}
+                  className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  aria-label="Delete event"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-3 mt-1">

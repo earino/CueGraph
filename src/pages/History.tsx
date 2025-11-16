@@ -2,12 +2,14 @@ import { useState, useMemo } from 'react';
 import { useCueGraph } from '../lib/store';
 import { EventCard } from '../components/EventCard';
 import { Modal } from '../components/Modal';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import type { EventInstance } from '../lib/types';
 
 export function History() {
   const { eventTypes, eventInstances, eventLinks, deleteEvent } = useCueGraph();
 
   const [selectedEvent, setSelectedEvent] = useState<EventInstance | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<EventInstance | null>(null);
   const [filterTypeIds, setFilterTypeIds] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<'24h' | '7d' | '30d' | 'all'>('all');
 
@@ -80,6 +82,13 @@ export function History() {
     if (selectedEvent) {
       await deleteEvent(selectedEvent.id);
       setSelectedEvent(null);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (eventToDelete) {
+      await deleteEvent(eventToDelete.id);
+      setEventToDelete(null);
     }
   };
 
@@ -191,6 +200,7 @@ export function History() {
                         event={event}
                         eventType={eventType}
                         onClick={() => setSelectedEvent(event)}
+                        onDelete={() => setEventToDelete(event)}
                       />
                     );
                   })}
@@ -303,6 +313,18 @@ export function History() {
           </div>
         )}
       </Modal>
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        isOpen={!!eventToDelete}
+        onClose={() => setEventToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Event?"
+        message="Are you sure you want to delete this event? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 }
