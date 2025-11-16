@@ -372,8 +372,8 @@ export function Log() {
             className="fixed inset-0 pointer-events-none flex items-center justify-center z-50"
           >
             <motion.div
-              initial={{ scale: 0, rotate: 0 }}
-              animate={{ scale: 1.5, rotate: 360 }}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1.5 }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{ duration: 0.6 }}
               className="text-8xl"

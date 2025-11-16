@@ -82,6 +82,7 @@ function AppRoutes() {
         <Route path="/insights" element={<Insights />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/" element={<Navigate to="/log" replace />} />
+        <Route path="*" element={<Navigate to="/log" replace />} />
       </Routes>
       <NavBar />
       <ToastContainer />

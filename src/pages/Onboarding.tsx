@@ -74,7 +74,6 @@ export function Onboarding() {
           <motion.div
             animate={{
               scale: [1, 1.2, 1],
-              rotate: [0, 90, 0],
             }}
             transition={{
               duration: 20,
@@ -86,7 +85,6 @@ export function Onboarding() {
           <motion.div
             animate={{
               scale: [1.2, 1, 1.2],
-              rotate: [0, -90, 0],
             }}
             transition={{
               duration: 15,
@@ -181,8 +179,8 @@ export function Onboarding() {
       >
         <div className="flex-1 max-w-2xl mx-auto w-full">
           <motion.div
-            initial={{ y: 20, opacity: 0, rotate: 0 }}
-            animate={{ y: 0, opacity: 1, rotate: 0 }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
           >
             <div className="text-center mb-8">
