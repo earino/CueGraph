@@ -181,8 +181,8 @@ export function Onboarding() {
       >
         <div className="flex-1 max-w-2xl mx-auto w-full">
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            initial={{ y: 20, opacity: 0, rotate: 0 }}
+            animate={{ y: 0, opacity: 1, rotate: 0 }}
             transition={{ delay: 0.1 }}
           >
             <div className="text-center mb-8">
