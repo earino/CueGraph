@@ -352,7 +352,7 @@ export function Onboarding() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-2xl p-4 text-center"
+              className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-2xl p-4 text-center mb-6"
             >
               <p className="text-purple-900 dark:text-purple-200">
                 <strong>Pro tip:</strong> The more events you log, the better patterns you'll discover!
