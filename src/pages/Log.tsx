@@ -24,7 +24,7 @@ export function Log() {
   const [pinNewEvent, setPinNewEvent] = useState(false);
 
   const pinnedTypes = eventTypes.filter(t =>
-    settings?.pinnedEventTypeIds.includes(t.id)
+    (settings?.pinnedEventTypeIds ?? []).includes(t.id)
   );
 
   const handleQuickLog = async (eventType: EventType) => {
