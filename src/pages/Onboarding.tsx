@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Zap, TrendingUp } from 'lucide-react';
 import { useCueGraph } from '../lib/store';
 import { trackEvent } from '../lib/telemetry';
+import { startOnboarding } from '../lib/onboardingLogic';
 
 // Popular starter events for quick onboarding
 const STARTER_EVENTS = [
@@ -49,15 +50,21 @@ export function Onboarding() {
   };
 
   const handleComplete = async () => {
+    // Initialize the 60-day guided onboarding journey
+    const onboardingUpdates = startOnboarding();
+
     await updateUserSettings({
       onboardingCompleted: true,
       pinnedEventTypeIds: [], // We'll let them customize this later in the app
+      ...onboardingUpdates,
     });
 
     trackEvent('onboarding_completed', {
       question_count: 0,
       pinned_count: 0,
     });
+
+    trackEvent('guided_onboarding_started');
   };
 
   // Screen 1: Hero/Welcome

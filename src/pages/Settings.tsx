@@ -4,8 +4,10 @@ import { setAnalyticsEnabled, isPostHogConfigured } from '../lib/telemetry';
 import { Modal } from '../components/Modal';
 import { DebugInfo } from '../components/DebugInfo';
 import { useInstallPrompt } from '../components/InstallPrompt';
-import { Download, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Download, CheckCircle, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
 import type { UserSettings } from '../lib/types';
+import { exitOnboardingMode, enterOnboardingMode, getCompletionPercentage, getCurrentStreak } from '../lib/onboardingLogic';
+import { getPhaseDescription } from '../lib/onboardingContent';
 
 export function Settings() {
   const { settings, updateUserSettings, eventTypes, clearAllData } = useCueGraph();
@@ -40,6 +42,11 @@ export function Settings() {
   const handleClearData = async () => {
     await clearAllData();
     setShowClearConfirm(false);
+  };
+
+  const handleToggleOnboardingMode = async () => {
+    const updates = settings.onboardingMode ? exitOnboardingMode() : enterOnboardingMode();
+    await updateUserSettings(updates);
   };
 
   const pinnedTypes = eventTypes.filter(t => settings.pinnedEventTypeIds.includes(t.id));
@@ -83,6 +90,92 @@ export function Settings() {
           >
             Manage Pinned Events
           </button>
+        </div>
+
+        {/* 60-Day Guided Onboarding */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <GraduationCap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Guided Onboarding
+            </h2>
+          </div>
+
+          {settings.onboardingStartDate ? (
+            <>
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 mb-4 border border-purple-200 dark:border-purple-800">
+                <div className="grid grid-cols-2 gap-4 mb-3">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Current Day</p>
+                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      {settings.currentOnboardingDay}/60
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Completed</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {settings.onboardingDaysCompleted.length}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                    <span>Progress</span>
+                    <span>{getCompletionPercentage(settings).toFixed(0)}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                      style={{ width: `${getCompletionPercentage(settings)}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <div>
+                    <p className="text-gray-600 dark:text-gray-400">Phase</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 capitalize">
+                      {settings.onboardingPhase.replace('-', ' ')}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-gray-600 dark:text-gray-400">Streak</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">
+                      {getCurrentStreak(settings)} days 🔥
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                {getPhaseDescription(settings.onboardingPhase)}
+              </p>
+
+              <label className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={settings.onboardingMode}
+                  onChange={handleToggleOnboardingMode}
+                  className="mt-1 w-5 h-5 text-purple-600 rounded"
+                />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                    Show daily goals and guidance
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {settings.onboardingMode
+                      ? 'You\'re in guided mode. Daily prompts help you build great habits.'
+                      : 'You\'re in advanced mode. Enable this to see daily goals again.'}
+                  </p>
+                </div>
+              </label>
+            </>
+          ) : (
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              You haven't started the guided onboarding journey yet. It will begin automatically after completing the initial setup.
+            </p>
+          )}
         </div>
 
         {/* Appearance */}

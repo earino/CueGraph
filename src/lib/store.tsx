@@ -62,6 +62,12 @@ export function CueGraphProvider({ children }: { children: React.ReactNode }) {
         graphEdgeThreshold: settingsRow.graphEdgeThreshold,
         analyticsEnabled: settingsRow.analyticsEnabled,
         consentGiven: settingsRow.consentGiven,
+        onboardingStartDate: settingsRow.onboardingStartDate,
+        currentOnboardingDay: settingsRow.currentOnboardingDay,
+        onboardingDaysCompleted: settingsRow.onboardingDaysCompleted,
+        onboardingPhase: settingsRow.onboardingPhase,
+        lastActivityDate: settingsRow.lastActivityDate,
+        onboardingMode: settingsRow.onboardingMode,
       }
     : null;
 
