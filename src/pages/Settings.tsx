@@ -3,12 +3,16 @@ import { useCueGraph } from '../lib/store';
 import { setAnalyticsEnabled, isPostHogConfigured } from '../lib/telemetry';
 import { Modal } from '../components/Modal';
 import { DebugInfo } from '../components/DebugInfo';
+import { useInstallPrompt } from '../components/InstallPrompt';
+import { Download, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import type { UserSettings } from '../lib/types';
 
 export function Settings() {
   const { settings, updateUserSettings, eventTypes, clearAllData } = useCueGraph();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showPinnedModal, setShowPinnedModal] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const { isInstallable, isInstalled, promptInstall } = useInstallPrompt();
 
   if (!settings) return <div>Loading...</div>;
 
@@ -173,6 +177,42 @@ export function Settings() {
           </div>
         )}
 
+        {/* Install App */}
+        {(isInstallable || isInstalled) && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+              Install App
+            </h2>
+
+            {isInstalled ? (
+              <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-green-900 dark:text-green-100">
+                    App installed!
+                  </p>
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    CueGraph is installed and ready to use offline.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Install CueGraph for quick access from your home screen and offline use.
+                </p>
+                <button
+                  onClick={promptInstall}
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  Install CueGraph
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Privacy */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
@@ -209,6 +249,29 @@ export function Settings() {
           >
             Clear All Data from This Device
           </button>
+        </div>
+
+        {/* Advanced Debugging */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6">
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between text-left"
+          >
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Advanced Debugging
+            </h2>
+            {showAdvanced ? (
+              <ChevronUp className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            )}
+          </button>
+
+          {showAdvanced && (
+            <div className="mt-4">
+              <DebugInfo />
+            </div>
+          )}
         </div>
 
         {/* Version */}
@@ -274,9 +337,6 @@ export function Settings() {
           </button>
         </div>
       </Modal>
-
-      {/* Debug info - remove after troubleshooting */}
-      <DebugInfo />
     </div>
   );
 }
