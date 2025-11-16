@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Sparkles } from 'lucide-react';
 import { useCueGraph } from '../lib/store';
@@ -6,7 +6,11 @@ import { useToasts } from '../lib/useToasts';
 import { Modal } from '../components/Modal';
 import { BottomSheet } from '../components/BottomSheet';
 import { Chip } from '../components/Chip';
+import { DailyGoalCard } from '../components/DailyGoalCard';
+import { OnboardingProgressBanner } from '../components/OnboardingProgressBanner';
 import type { EventInstance, EventType } from '../lib/types';
+import { getDayContent } from '../lib/onboardingContent';
+import { calculateCurrentDay, markDayComplete, isDayCompleted, advanceToNextDay } from '../lib/onboardingLogic';
 
 export function Log() {
   const { eventTypes, settings, logEvent, createLink, eventInstances, createEventType, updateUserSettings } = useCueGraph();
@@ -16,6 +20,7 @@ export function Log() {
   const [showCauseSheet, setShowCauseSheet] = useState(false);
   const [justLoggedEvent, setJustLoggedEvent] = useState<EventInstance | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showDailyGoal, setShowDailyGoal] = useState(false);
 
   // New event type form
   const [newEventName, setNewEventName] = useState('');
@@ -26,6 +31,45 @@ export function Log() {
   const pinnedTypes = eventTypes.filter(t =>
     (settings?.pinnedEventTypeIds ?? []).includes(t.id)
   );
+
+  // Onboarding state
+  const isInOnboardingMode = settings?.onboardingMode ?? false;
+  const currentDay = settings ? calculateCurrentDay(settings) : 1;
+  const dayContent = getDayContent(currentDay);
+  const isDayComplete = settings ? isDayCompleted(settings, currentDay) : false;
+
+  // Update current day if needed (when calendar day advances)
+  useEffect(() => {
+    if (settings && isInOnboardingMode) {
+      const calculatedDay = calculateCurrentDay(settings);
+      if (calculatedDay !== settings.currentOnboardingDay) {
+        // Silently update to new day
+        const updates = advanceToNextDay(settings);
+        updateUserSettings(updates);
+      }
+    }
+  }, [settings, isInOnboardingMode]);
+
+  const handleMarkDayComplete = async () => {
+    if (!settings) return;
+
+    const updates = markDayComplete(settings, currentDay);
+    await updateUserSettings(updates);
+
+    addToast(`Day ${currentDay} complete! 🎉`, 'success');
+
+    // If there's a next day, show preview
+    if (currentDay < 60) {
+      setTimeout(() => {
+        const nextDayUpdates = advanceToNextDay(settings);
+        updateUserSettings(nextDayUpdates);
+        addToast(`Welcome to Day ${currentDay + 1}!`, 'success');
+      }, 1500);
+    } else {
+      // Completed all 60 days!
+      addToast('🎓 Congratulations! You\'ve completed the guided onboarding!', 'success');
+    }
+  };
 
   const handleQuickLog = async (eventType: EventType) => {
     const event = await logEvent(eventType.id);
@@ -105,6 +149,26 @@ export function Log() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 pb-24">
       <div className="max-w-2xl mx-auto">
+        {/* Onboarding UI - only show if in onboarding mode */}
+        {isInOnboardingMode && settings && dayContent && (
+          <>
+            <OnboardingProgressBanner
+              currentDay={currentDay}
+              phase={settings.onboardingPhase}
+              daysCompleted={settings.onboardingDaysCompleted}
+              onClick={() => setShowDailyGoal(!showDailyGoal)}
+            />
+
+            {showDailyGoal && (
+              <DailyGoalCard
+                dayContent={dayContent}
+                isCompleted={isDayComplete}
+                onMarkComplete={handleMarkDayComplete}
+              />
+            )}
+          </>
+        )}
+
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

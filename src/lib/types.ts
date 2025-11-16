@@ -57,6 +57,8 @@ export interface TypeEdgeStats {
   edgeSources: EdgeSource[];   // e.g. ["user"] or ["user", "inferred"]
 }
 
+export type OnboardingPhase = "foundation" | "evidence-building" | "mastery" | "completed";
+
 export interface UserSettings {
   onboardingCompleted: boolean;
   pinnedEventTypeIds: string[];    // for home quick-log buttons
@@ -65,4 +67,12 @@ export interface UserSettings {
   graphEdgeThreshold: number;      // default min inferredStrength to show edges (0–1)
   analyticsEnabled: boolean;       // whether anonymous usage analytics is on
   consentGiven?: boolean;          // undefined = not asked yet, true = accepted, false = declined
+
+  // 60-day guided onboarding
+  onboardingStartDate?: string;    // ISO timestamp when user started onboarding
+  currentOnboardingDay: number;    // 1-60, current day in the program
+  onboardingDaysCompleted: number[]; // array of completed day numbers
+  onboardingPhase: OnboardingPhase; // current phase of onboarding
+  lastActivityDate?: string;       // ISO timestamp of last interaction (for day calculation)
+  onboardingMode: boolean;         // true = in guided mode, false = advanced/free mode
 }

@@ -35,6 +35,10 @@ export async function initializeSettings(): Promise<UserSettings> {
     questions: [],
     graphEdgeThreshold: 0.3,
     analyticsEnabled: true, // Enabled by default, users can opt out in Settings
+    currentOnboardingDay: 1,
+    onboardingDaysCompleted: [],
+    onboardingPhase: 'foundation',
+    onboardingMode: true,
   };
 
   await db.userSettings.put({ id: 1, ...defaultSettings });
