@@ -3,6 +3,7 @@ import { CueGraphProvider, useCueGraph } from './lib/store';
 import { ToastProvider } from './lib/useToasts';
 import { ToastContainer } from './components/Toast';
 import { ConsentBanner } from './components/ConsentBanner';
+import { UpdateNotification } from './components/UpdateNotification';
 import { NavBar } from './components/NavBar';
 import { Onboarding } from './pages/Onboarding';
 import { Log } from './pages/Log';
@@ -97,6 +98,7 @@ function App() {
       <ToastProvider>
         <CueGraphProvider>
           <AppRoutes />
+          <UpdateNotification />
         </CueGraphProvider>
       </ToastProvider>
     </HashRouter>
